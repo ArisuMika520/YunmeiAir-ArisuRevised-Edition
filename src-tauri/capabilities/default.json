@@ -3,5 +3,15 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": ["main"],
-  "permissions": ["core:default", "blec:default"]
+  "remote": {
+    "urls": ["https://*.fosky.top"]
+  },
+  "permissions": [
+    "core:default",
+    "blec:default",
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://*.fosky.top" }]
+    }
+  ]
 }

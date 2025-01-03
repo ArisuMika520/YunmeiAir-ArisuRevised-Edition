@@ -37,7 +37,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
-import { useAxios } from '@vueuse/integrations/useAxios'
+import { fetch as webFetch } from 'cross-fetch'
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
+import { isTauri } from '@/utils/tauri'
+
 import md5 from 'md5'
 import Lock from '@/entity/Lock'
 import { useUserDataStore } from '@/stores/userData'
@@ -58,21 +61,27 @@ onClickOutside(target, () => closeModal())
 const username = ref<string>('')
 const password = ref<string>('')
 
-const { execute, isLoading } = useAxios()
+const isLoading = ref<boolean>(false)
 
 const login = async (e: Event) => {
   e.preventDefault()
   const url = `https://api.fosky.top/api/yunmei/login?username=${username.value}&password=${password.value}`
-
-  execute(url)
-    .then((response) => {
-      console.log(response)
-      if (response.data.value.code == 500) {
-        window.alert('登录出错了。' + response.data.value.msg)
+  const fetch = isTauri() ? tauriFetch : webFetch
+  fetch(url)
+    .then((res) => {
+      if (res.status >= 400) {
+        throw new Error('Bad response from server')
+      }
+      return res.json()
+    })
+    .then((data) => {
+      console.log(data)
+      if (data.code == 500) {
+        window.alert('登录出错了。' + data.msg)
         return
       }
 
-      const lockRes = response.data.value.data
+      const lockRes = data.data
       const currentLock = new Lock()
       currentLock.label = `${lockRes.buildName}-${lockRes.dormNo}`
       currentLock.D_SEC = lockRes.lockSecret
@@ -91,8 +100,9 @@ const login = async (e: Event) => {
       password.value = ''
       closeModal()
     })
-    .catch((error) => {
-      window.alert('登录出错了。' + error)
+    .catch((err) => {
+      console.error(err)
+      window.alert('登录出错了。' + err)
     })
 }
 </script>
