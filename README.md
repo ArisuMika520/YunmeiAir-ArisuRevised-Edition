@@ -1,39 +1,21 @@
-# yunmei-x-vue
+# 关于
 
-This template should help get you started developing with Vue 3 in Vite.
+YunmeiX 是一个基于 vue3+vueuse+tailwindcss+tauri 等技术栈的跨平台第三方云莓智能项目。项目灵感与部分技术来自于[云梅不智能PWA](https://github.com/zxy19/yunmei_unintelligent_pwa)
 
-## Recommended IDE Setup
+本项目仓库：[YunmeiX](https://github.com/FoskyM/yunmei-x-vue)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+# 使用
 
-## Type Support for `.vue` Imports in TS
+使用一个现代化的，支持蓝牙的浏览器打开即可（如安卓/PC的Chrome/Edge，IOS Bluefy），或者使用编译后的客户端。
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+# 隐私
 
-## Customize configuration
+登录请求将通过 https://api.fosky.top/api/yunmei/login 进行处理。
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+除此之外，YunmeiX 不会存储您的任何数据， 其他数据将直接在本地处理。
 
-## Project Setup
+# 链接
 
-```sh
-npm install
-```
+[傅四霁个人主页](https://fosky.top)
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+[计量便民平台](https://cp.cjlu.cc)
