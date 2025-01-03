@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import router from '@/router'
 import CheckBrowser from '@/components/CheckBrowser'
+import ModalLogin from './components/ModalLogin.vue'
 </script>
 
 <template>
@@ -10,6 +11,7 @@ import CheckBrowser from '@/components/CheckBrowser'
   </div>
   <div class="container mx-auto px-4 py-12 h-full">
     <CheckBrowser />
+    <ModalLogin />
     <RouterView />
   </div>
 </template>

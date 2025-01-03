@@ -83,7 +83,7 @@ const { stop } = pausableWatch(isConnected, (newIsConnected) => {
         >
           开门
         </button>
-        <button class="btn btn-ghost w-full">添加门锁</button>
+        <label for="modal-login" class="btn btn-ghost w-full">添加门锁</label>
       </div>
     </div>
   </div>

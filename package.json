@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^12.3.0",
+    "@vueuse/integrations": "^12.3.0",
     "axios": "^1.7.9",
     "daisyui": "^4.12.23",
     "js-base64": "^3.7.7",
