@@ -5,7 +5,7 @@ import CheckBrowser from '@/components/CheckBrowser'
 </script>
 
 <template>
-  <div class="container mx-auto px-4 h-full">
+  <div class="container mx-auto px-4 py-12 h-full">
     <CheckBrowser />
     <RouterView />
   </div>
