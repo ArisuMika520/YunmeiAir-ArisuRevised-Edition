@@ -12,6 +12,10 @@ const userDataStore = useUserDataStore()
 const memo = ref<string>('等待开锁')
 const progress = ref<number>(0)
 
+if (userDataStore.lockList.length == 0) {
+  memo.value = '请先添加门锁'
+}
+
 const currentLockServ = ref('none')
 const isUnlocking = ref(false)
 
@@ -44,6 +48,11 @@ async function unlock() {
     update(0, '出错')
   }
   isUnlocking.value = false
+}
+
+const connect = () => {
+  update(10, '连接中')
+  requestDevice()
 }
 
 const { stop } = pausableWatch(isConnected, (newIsConnected) => {
@@ -79,7 +88,8 @@ const { stop } = pausableWatch(isConnected, (newIsConnected) => {
 
         <button
           class="btn btn-primary w-full my-2"
-          @click="(update(10, '连接中'), requestDevice())"
+          @click="connect()"
+          :disabled="currentLockServ == 'none'"
         >
           开门
         </button>
