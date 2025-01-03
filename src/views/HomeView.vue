@@ -29,9 +29,21 @@ watch(userDataStore.lockList, () => {
   updateLockMemo()
 })
 
-const { isConnected, requestDevice, server, error } = useBluetooth({
-  filters: [{ services: [currentLockServ.value.toLowerCase()] }],
+const bluetoothInstance = ref(
+  useBluetooth({
+    filters: [{ services: [currentLockServ.value.toLowerCase()] }],
+  }),
+)
+
+watch(currentLockServ, (newVal) => {
+  bluetoothInstance.value = useBluetooth({
+    filters: [{ services: [newVal.toLowerCase()] }],
+  })
 })
+
+const isConnected = ref(bluetoothInstance.value.isConnected)
+const server = ref(bluetoothInstance.value.server)
+const error = ref(bluetoothInstance.value.error)
 
 const update = (_progress: number, _memo: string) => {
   progress.value = _progress
@@ -62,7 +74,7 @@ async function unlock() {
 const connect = () => {
   isUnlocking.value = true
   update(10, '连接中')
-  requestDevice()
+  bluetoothInstance.value.requestDevice()
 }
 
 watch(error, (newVal) => {
