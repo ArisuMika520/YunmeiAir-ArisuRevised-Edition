@@ -38,6 +38,11 @@
 import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { useAxios } from '@vueuse/integrations/useAxios'
+import md5 from 'md5'
+import Lock from '@/entity/Lock'
+import { useUserDataStore } from '@/stores/userData'
+
+const userDataStore = useUserDataStore()
 
 const target = ref(null)
 
@@ -59,11 +64,35 @@ const login = async (e: Event) => {
   e.preventDefault()
   const url = `https://api.fosky.top/api/yunmei/login?username=${username.value}&password=${password.value}`
 
-  const result = await execute(url)
-  console.log(result)
-  // TODO: 登录后添加门锁
-  username.value = ''
-  password.value = ''
-  closeModal()
+  execute(url)
+    .then((response) => {
+      console.log(response)
+      if (response.data.value.code == 500) {
+        window.alert('登录出错了。' + response.data.value.msg)
+        return
+      }
+
+      const lockRes = response.data.value.data
+      const currentLock = new Lock()
+      currentLock.label = `${lockRes.buildName}-${lockRes.dormNo}`
+      currentLock.D_SEC = lockRes.lockSecret
+      currentLock.D_CHAR = lockRes.lockCharacterUuid
+      currentLock.D_SERV = lockRes.lockServiceUuid
+      currentLock.D_Mac = lockRes.lockNo
+      currentLock.lockNo = lockRes.lockNo
+      currentLock.schoolNo = lockRes.schoolNo
+      currentLock.username = md5(username.value)
+
+      userDataStore.addLock(currentLock)
+
+      window.alert('登录成功，成功获取到门锁并添加。')
+
+      username.value = ''
+      password.value = ''
+      closeModal()
+    })
+    .catch((error) => {
+      window.alert('登录出错了。' + error)
+    })
 }
 </script>
