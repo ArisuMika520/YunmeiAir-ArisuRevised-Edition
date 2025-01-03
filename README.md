@@ -7,6 +7,8 @@ YunmeiX 是一个基于 vue3+vueuse+tailwindcss+tauri 等技术栈的跨平台�
 # 使用
 
 使用一个现代化的，支持蓝牙的浏览器打开即可（如安卓/PC的Chrome/Edge，IOS Bluefy），或者使用编译后的客户端。
+在线地址1：https://yunmei-x.vercel.app/
+在线地址2：https://yunmeix.vercel.fosky.top/
 
 # 隐私
 
