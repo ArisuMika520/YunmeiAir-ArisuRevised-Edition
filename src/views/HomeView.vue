@@ -12,12 +12,15 @@ const userDataStore = useUserDataStore()
 const memo = ref<string>('等待开锁')
 const progress = ref<number>(0)
 
-if (userDataStore.lockList.length == 0) {
-  memo.value = '请先添加门锁'
-}
-
 const currentLockServ = ref('none')
 const isUnlocking = ref(false)
+
+if (userDataStore.lockList.length === 0) {
+  memo.value = '请先添加门锁'
+} else if (userDataStore.lockList.length === 1) {
+  currentLockServ.value = userDataStore.lockList[0].D_SERV
+  memo.value = '等待开锁'
+}
 
 const { isConnected, requestDevice, server } = useBluetooth({
   acceptAllDevices: true,
