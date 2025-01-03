@@ -8,7 +8,7 @@
         使用云莓智能登录以添加门锁。你的账号信息将会发送到我们的服务进行处理，在此过程中我们不会存储你的信息，请放心使用。
         <span class="font-bold">(详见关于)</span>
       </p>
-      <form class="flex flex-col gap-4" @submit="login">
+      <form class="flex flex-col gap-4 py-4" @submit="login">
         <div class="form-control">
           <input
             type="text"
