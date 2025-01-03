@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { pausableWatch, useBluetooth } from '@vueuse/core'
+import { pausableWatch, useBluetooth, type UseBluetoothReturn } from '@vueuse/core'
+
+import { isTauri, TauriBLE } from '@/utils/tauri'
 
 import Lock from '@/entity/Lock'
 
 import { useUserDataStore } from '@/stores/userData'
 import { getPwd } from '@/utils/yunmei'
+import type { BleDevice } from '@mnlphlp/plugin-blec'
 const userDataStore = useUserDataStore()
 
 const memo = ref<string>('等待开锁')
@@ -29,21 +32,27 @@ watch(userDataStore.lockList, () => {
   updateLockMemo()
 })
 
-const bluetoothInstance = ref(
-  useBluetooth({
+const tauriBLE = ref<TauriBLE | null>(null)
+const bluetoothInstance = ref<UseBluetoothReturn | null>(null)
+if (isTauri()) {
+  tauriBLE.value = new TauriBLE()
+} else {
+  bluetoothInstance.value = useBluetooth({
     filters: [{ services: [currentLockServ.value.toLowerCase()] }],
-  }),
-)
+  })
+}
 
 watch(currentLockServ, (newVal) => {
-  bluetoothInstance.value = useBluetooth({
-    filters: [{ services: [newVal.toLowerCase()] }],
-  })
+  if (!isTauri()) {
+    bluetoothInstance.value = useBluetooth({
+      filters: [{ services: [newVal.toLowerCase()] }],
+    })
+  }
 })
 
-const isConnected = ref(bluetoothInstance.value.isConnected)
-const server = ref(bluetoothInstance.value.server)
-const error = ref(bluetoothInstance.value.error)
+const isConnected = ref(bluetoothInstance.value?.isConnected)
+const server = ref(bluetoothInstance.value?.server)
+const error = ref(bluetoothInstance.value?.error)
 
 const update = (_progress: number, _memo: string) => {
   progress.value = _progress
@@ -55,14 +64,21 @@ async function unlock() {
     const currentLock = userDataStore.lockList.find(
       (lock: Lock) => lock.D_SERV == currentLockServ.value,
     )
-    const service = await server.value.getPrimaryService(currentLockServ.value.toLowerCase())
-    update(50, '查询中')
-    const characteristic = await service.getCharacteristic(currentLock?.D_CHAR.toLowerCase())
-    console.log(characteristic)
-    update(60, '查询成功，解锁中')
-    const pwd = getPwd(currentLock?.D_SEC || '')
-    await characteristic.writeValue(pwd)
-    update(100, '完成')
+    if (isTauri()) {
+      update(55, '解锁中')
+      const pwd = getPwd(currentLock?.D_SEC || '')
+      tauriBLE.value?.writeValue(currentLock?.D_CHAR.toLowerCase() as string, new Uint8Array(pwd))
+      tauriBLE.value?.disconnect()
+      update(100, '完成')
+    } else {
+      const service = await server.value.getPrimaryService(currentLockServ.value.toLowerCase())
+      update(50, '查询中')
+      const characteristic = await service.getCharacteristic(currentLock?.D_CHAR.toLowerCase())
+      update(60, '查询成功，解锁中')
+      const pwd = getPwd(currentLock?.D_SEC || '')
+      await characteristic.writeValue(pwd)
+      update(100, '完成')
+    }
   } catch (error) {
     console.error(error)
     errorMsg.value = error as string
@@ -71,36 +87,49 @@ async function unlock() {
   isUnlocking.value = false
 }
 
-const connect = () => {
+const connect = async () => {
   isUnlocking.value = true
   update(10, '连接中')
-  bluetoothInstance.value.requestDevice()
+  if (isTauri()) {
+    const device = tauriBLE.value?.getDevice(currentLockServ.value.toLowerCase())
+    if (!device) {
+      update(0, '未找到设备')
+      isUnlocking.value = false
+      return
+    }
+    await tauriBLE.value?.connectDevice(device as BleDevice)
+    await unlock()
+  } else {
+    bluetoothInstance.value?.requestDevice()
+  }
 }
 
-watch(error, (newVal) => {
-  console.log(newVal)
-  errorMsg.value = newVal as string
-  if (newVal !== null) {
-    if (newVal == 'NotFoundError: Bluetooth adapter not available.') {
-      memo.value = '未找到蓝牙适配器'
-    } else if (newVal == 'NotFoundError: User cancelled the requestDevice() chooser.') {
-      memo.value = '您取消了选择'
-    } else if (newVal == 'NetworkError: Connection Error: Connection attempt failed.') {
-      memo.value = '连接失败'
+if (!isTauri()) {
+  watch(error, (newVal) => {
+    console.log(newVal)
+    errorMsg.value = newVal as string
+    if (newVal !== null) {
+      if (newVal == 'NotFoundError: Bluetooth adapter not available.') {
+        memo.value = '未找到蓝牙适配器'
+      } else if (newVal == 'NotFoundError: User cancelled the requestDevice() chooser.') {
+        memo.value = '您取消了选择'
+      } else if (newVal == 'NetworkError: Connection Error: Connection attempt failed.') {
+        memo.value = '连接失败'
+      }
+
+      isUnlocking.value = false
+      progress.value = 0
     }
+  })
 
-    isUnlocking.value = false
-    progress.value = 0
-  }
-})
-
-const { stop } = pausableWatch(isConnected, async (newIsConnected) => {
-  console.log(newIsConnected)
-  if (!newIsConnected || !server.value || !isUnlocking.value) return
-  update(30, '找到设备')
-  await unlock()
-  stop()
-})
+  const { stop } = pausableWatch(isConnected, async (newIsConnected) => {
+    console.log(newIsConnected)
+    if (!newIsConnected || !server.value || !isUnlocking.value) return
+    update(30, '找到设备')
+    await unlock()
+    stop()
+  })
+}
 </script>
 
 <template>
