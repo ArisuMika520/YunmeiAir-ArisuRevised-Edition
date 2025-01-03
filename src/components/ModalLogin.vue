@@ -1,7 +1,7 @@
 <template>
   <input type="checkbox" id="modal-login" class="modal-toggle" />
   <div class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box sm:w-11/12 sm:max-w-[500px]">
+    <div class="modal-box sm:w-11/12 sm:max-w-[500px]" ref="target">
       <label for="modal-login" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
       <h3 class="font-bold text-lg">登录</h3>
       <p class="py-4">
@@ -36,7 +36,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 import { useAxios } from '@vueuse/integrations/useAxios'
+
+const target = ref(null)
+
+const closeModal = () => {
+  const modalLogin = document.getElementById('modal-login') as HTMLInputElement
+  if (modalLogin) {
+    modalLogin.checked = false
+  }
+}
+
+onClickOutside(target, () => closeModal())
 
 const username = ref<string>('')
 const password = ref<string>('')
@@ -53,12 +65,5 @@ const login = async (e: Event) => {
   username.value = ''
   password.value = ''
   closeModal()
-}
-
-const closeModal = () => {
-  const modalLogin = document.getElementById('modal-login') as HTMLInputElement
-  if (modalLogin) {
-    modalLogin.checked = false
-  }
 }
 </script>
