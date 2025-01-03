@@ -14,6 +14,7 @@
     "tauri": "npx tauri"
   },
   "dependencies": {
+    "@mnlphlp/plugin-blec": "^0.3.3",
     "@vueuse/core": "^12.3.0",
     "@vueuse/integrations": "^12.3.0",
     "axios": "^1.7.9",
