@@ -16,12 +16,18 @@ const errorMsg = ref<string>('')
 const currentLockServ = ref<string>('none')
 const isUnlocking = ref<boolean>(false)
 
-if (userDataStore.lockList.length === 0) {
-  memo.value = '请先添加门锁'
-} else if (userDataStore.lockList.length === 1) {
-  currentLockServ.value = userDataStore.lockList[0].D_SERV
-  memo.value = '等待开锁'
+const updateLockMemo = () => {
+  if (userDataStore.lockList.length === 0) {
+    memo.value = '请先添加门锁'
+  } else if (userDataStore.lockList.length === 1) {
+    currentLockServ.value = userDataStore.lockList[0].D_SERV
+    memo.value = '等待开锁'
+  }
 }
+updateLockMemo()
+watch(userDataStore.lockList, () => {
+  updateLockMemo()
+})
 
 const { isConnected, requestDevice, server, error } = useBluetooth({
   filters: [{ services: [currentLockServ.value.toLowerCase()] }],
