@@ -2,6 +2,8 @@
 
 YunmeiAir-ArisuRevised-Edition 基于[云莓不智能PWA](https://github.com/zxy19/yunmei_unintelligent_pwa)以及[云莓X](https://github.com/FoskyM/YunmeiX)的技术之上，修改了前端以及部署
 
+目前暂未开发
+
 
 # 使用
 
